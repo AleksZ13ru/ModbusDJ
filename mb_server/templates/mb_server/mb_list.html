@@ -1,0 +1,546 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Пар</title>
+    <!-- Load foundation6.4.2.css -->
+    <link href="{% static 'mb_server/css/foundation.css' %}" rel="stylesheet">
+    <link href="{% static 'mb_server/css/app.css' %}" rel="stylesheet">
+
+    <!-- Load c3.css -->
+    <link href="{% static 'mb_server/css/c3.css' %}" rel="stylesheet">
+
+    {#    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>#}
+    <!-- Load d3.js and c3.js -->
+    <script src="{% static 'mb_server/js/d3.v3.js' %}" charset="utf-8"></script>
+    <script src="{% static 'mb_server/js/c3.js' %}"></script>
+</head>
+<body>
+<div class="top-bar">
+    <div class="top-bar-left">
+        <ul class="dropdown menu" data-dropdown-menu>
+            <li class="menu-text">Пар</li>
+            <li><a href='{% url 'mb_list' %}'>Все</a></li>
+            {% for device in devices %}
+                <li><a href='{% url 'mb_detals' pk=device.pk %}'>{{ device.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="top-bar-right">
+        <ul class="menu">
+            <li><input type="search" placeholder="Search"></li>
+            <li>
+                <button type="button" class="button">Обновить</button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="grid-container " style="margin-top: 2%">
+    <div class="grid-x grid-margin-x">
+        {#        <div class="small-6 cell">#}
+        {#            <div class="callout">#}
+        {#                <div class="grid-x">#}
+        {#                    <div class="small-12 cell text-center">#}
+        {#                        <h5>Битумный котел</h5>#}
+        {#                    </div>#}
+        {#                    <div class="small-6 cell">#}
+        {#                        <div id="gauge1"></div>#}
+        {#                    </div>#}
+        {#                    <div class="small-6 cell">#}
+        {#                        <div id="gauge2"></div>#}
+        {#                    </div>#}
+        {#                </div>#}
+        {#            </div>#}
+        {#        </div>#}
+        {#        <div class="small-6 cell">#}
+        {#            <div class="callout">#}
+        {#                <div class="grid-x">#}
+        {#                    <div class="small-12 cell text-center">#}
+        {#                        <h5>Теплопункт</h5>#}
+        {#                    </div>#}
+        {#                    <div class="small-6 cell">#}
+        {#                        <div id="gauge3"></div>#}
+        {#                    </div>#}
+        {#                    <div class="small-6 cell">#}
+        {#                        <div id="gauge4"></div>#}
+        {#                    </div>#}
+        {#                </div>#}
+        {#            </div>#}
+        {#        </div>#}
+        {% for device in devices %}
+            <div class="small-6 cell">
+                <div class="callout">
+                    <div class="grid-x">
+                        <div class="small-12 cell text-center">
+                            <h5>{{ device.title }}</h5>
+                        </div>
+                        <div class="small-6 cell">
+                            <div id="gauge-{{ device.pk }}-t"></div>
+                        </div>
+                        <div class="small-6 cell">
+                            <div id="gauge-{{ device.pk }}-p"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="grid-x">
+        <div class="small-12 cell">
+            <div class="callout">
+                <div id="chart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="{% static 'mb_server/js/jquery.js' %}"></script>
+<script src="{% static 'mb_server/js/what-input.js' %}"></script>
+<script src="{% static 'mb_server/js/foundation.js' %}"></script>
+<script src="{% static 'mb_server/js/app.js' %}"></script>
+<script>
+    {#    var time_x3;#}
+    {#    var data7;#}
+    {#    var chart = c3.generate({#}
+    {#        data: {#}
+    {#            x: 'x1',#}
+    {#            xFormat: '%H:%M',#}
+    {#            json: {#}
+    {#                'x1': time_x3,#}
+    {#                'Obj1.T': data7,#}
+    {#                'Obj1.P': data2#}
+    {#            },#}
+    {#            axes: {#}
+    {#                'Obj1.T': 'y',#}
+    {#                'Obj1.P': 'y2'#}
+    {#            },#}
+    {#        },#}
+    {#        axis: {#}
+    {#            x: {#}
+    {#                type: 'timeseries',#}
+    {#                tick: {#}
+    {#                    count: 12,#}
+    {#                    //format: '%Y-%m-%d'#}
+    {#                    format: '%H:%M'#}
+    {#                }#}
+    {#            },#}
+    {#            y2: {#}
+    {#                show: true#}
+    {#            }#}
+    {#        }#}
+    {#    });#}
+    {##}
+    {#    $.getJSON('{% url "mb_json2_time_stamp_detail" pk=3 %}', function (data) {#}
+    {#        time_x3 = data["x"];#}
+    {#    });#}
+    {##}
+    {#    {% for dev in devices %}#}
+    {##}
+    {#        $.getJSON('{% url "json_val_in_dev_detail" pk=dev.pk %}', function (data) {#}
+    {#            var reg = data["registers"];#}
+    {##}
+    {#            for (var i = 0; i < reg.length; i++) {#}
+    {#                var name = 'trend' + i;#}
+    {#                chart.load({#}
+    {#                    json: {#}
+    {#                        'x1': time_x3,#}
+    {#                        name: reg[i]["values"][0]["value"]#}
+    {#                    },#}
+    {#                    names: {#}
+    {#                        data1: name#}
+    {#                    },#}
+    {#                    axes: {#}
+    {#                        '{{ dev.title }}-{{ reg.title }}': 'y',#}
+    {#                'Obj2.P': 'y2'#}
+    {#                    }#}
+    {#                });#}
+    {#            }#}
+    {#        });#}
+    {#    {% endfor %}#}
+    {#    var chart = c3.generate({#}
+    {#        data: {#}
+    {#            x: 'x1',#}
+    {#            xFormat: '%H:%M',#}
+    {#            json: {#}
+    {#                'x1': time_x3,#}
+    {#                'Obj1.T': data7,#}
+    {#                'Obj1.P': data2#}
+    {#            },#}
+    {#            axes: {#}
+    {#                'Obj1.T': 'y',#}
+    {#                'Obj1.P': 'y2'#}
+    {#            },#}
+    {#        },#}
+    {#        axis: {#}
+    {#            x: {#}
+    {#                type: 'timeseries',#}
+    {#                tick: {#}
+    {#                    //format: '%Y-%m-%d'#}
+    {#                    format: '%H:%M'#}
+    {#                }#}
+    {#            },#}
+    {#            y2: {#}
+    {#                show: true#}
+    {#            }#}
+    {#        }#}
+    {#    });#}
+    {#    chart.load({#}
+    {#        json: {#}
+    {#            'x1': time_x3,#}
+    {#            'Obj2.T': data7,#}
+    {#            'Obj2.P': data4#}
+    {#        },#}
+    {#        axes: {#}
+    {#            'Obj2.T': 'y',#}
+    {#            'Obj2.P': 'y2'#}
+    {#        },#}
+    {#    });#}
+</script>
+<script>
+    var columns = [];
+    d3.json('{% url "mb_json2_time_stamp_detail" pk=3 %}', function (data) {
+        var x1 = [];
+        columns.push(x1.concat("x1", data["x"]));
+        console.log(x1);
+    });
+    {#    d3.json('{% url "json_val_in_dev" %}', function (data) {#}
+    {#        var axes = {};#}
+    {#        var names = {};#}
+    {#        for (var i = 0; i < data.length; i++) {#}
+    {#            var name_first = data[i]["title"];#}
+    {#            var registers = data[i]["registers"];#}
+    {##}
+    {#            for (var j = 0; j < registers.length; j++) {#}
+    {#                var name_second = registers[j]["title"];#}
+    {#                var name_full = name_first + "." + name_second;#}
+    {#                var values = registers[j]["values"];#}
+    {#                for (var y = 0; y < values.length; y++) {#}
+    {#                    var data_id = "data" + values[y]["id"];#}
+    {#                    var value = values[y]["value"];#}
+    {#                    var column = [];#}
+    {#                    columns.push(column.concat(data_id, value));#}
+    {#                    names[data_id] = name_full;#}
+    {#                    switch (name_second) {#}
+    {#                        case "Температура":#}
+    {#                            axes[data_id] = "y";#}
+    {#                            break;#}
+    {#                        case "Давление":#}
+    {#                            axes[data_id] = "y2";#}
+    {#                            break;#}
+    {#                        default:#}
+    {#                            axes[data_id] = "y";#}
+    {#                            break;#}
+    {#                    }#}
+    {#                }#}
+    {##}
+    {#            }#}
+    {##}
+    {#        }#}
+
+    function show_trend() {
+        d3.json('{% url "json_val_in_dev" %}', function (data) {
+            var axes = {};
+            var names = {};
+            for (var i = 0; i < data.length; i++) {
+                var name_first = data[i]["dev_title"];
+                var name_second = data[i]["reg_title"];
+                var name_full = name_first + "." + name_second;
+                var values = data[i]["value"];
+                var data_id = "data" + data[i]["id"];
+                var column = [];
+                columns.push(column.concat(data_id, values));
+                names[data_id] = name_full;
+                switch (name_second) {
+                    case "Температура":
+                        axes[data_id] = "y";
+                        break;
+                    case "Давление":
+                        axes[data_id] = "y2";
+                        break;
+                    default:
+                        axes[data_id] = "y";
+                        break;
+                }
+            }
+            console.log(columns);
+            console.log(names);
+            var chart = c3.generate({
+                bindto: '#chart',
+                data: {
+                    columns: columns,
+//                    mimeType: 'json',
+                    x: 'x1',
+                    xFormat: '%H:%M',
+                    axes: axes,
+                    names: names
+                },
+                axis: {
+                    x: {
+                        type: 'timeseries',
+                        tick: {
+                            count: 12,
+                            format: '%H:%M'
+                        }
+                    },
+                    y2: {
+                        show: true
+                    }
+                }
+            });
+        });
+    }
+    $(document).ready(function () {
+        show_trend();
+                setInterval('show_trend()', 60000);
+    });
+</script>
+{#<script>#}
+{##}
+{#    var chart = c3.generate({#}
+{#        bindto: '#chart',#}
+{#        data: {#}
+{#            url: '{% url "mb_json2_detail" pk=12 %}',#}
+{#            mimeType: 'json',#}
+{#            x: 'time_stamp',#}
+{#            xFormat: "%H:%M"#}
+{#        },#}
+{#        keys: {#}
+{#            // x: 'name', // it's possible to specify 'x' when category axis#}
+{#            value: ['value']#}
+{#        },#}
+{#        axis: {#}
+{#            x: {#}
+{#                type: 'timeseries',#}
+{#                tick: {#}
+{#                    count: 12,#}
+{#                    format: "%H:%M"#}
+{#                }#}
+{#            }#}
+{#        }#}
+{#    });#}
+{#    chart.load({#}
+{#        url: '{% url "mb_json2_detail" pk=13 %}',#}
+{#        keys: {#}
+{#            x: 'time_stamp', // it's possible to specify 'x' when category axis#}
+{#            value: ['value']#}
+{#        }#}
+{##}
+{#    });#}
+
+{#    $.getJSON('{% url "mb_json2_detail" pk=13 %}', function (data) {#}
+{#        var items = data["value"];#}
+{#        chart.load({#}
+{#            url: '{% url "mb_json2_detail" pk=13 %}#}
+{##}
+{#        })#}
+{#    });#}
+{#    chart.load({#}
+{#        data: {#}
+{#            url: '{% url "mb_json2_detail" pk=12 %}'#}
+{#        }#}
+{#        keys: {#}
+{#            value: ['value']#}
+{#        }#}
+{#    });#}
+{#</script>#}
+{#{#}
+{#    "title": "Теплопункт №1",#}
+{#    "registers": [#}
+{#        {#}
+{#            "title": "Температура",#}
+{#            "last_value": 49,#}
+{#            "last_time": "2017-11-08T22:02:10.718495"#}
+{#        },#}
+{#        {#}
+{#            "title": "Давление",#}
+{#            "last_value": 99,#}
+{#            "last_time": "2017-11-08T22:02:13.756731"#}
+{#        }#}
+{#    ]#}
+{#}#}
+
+<script>
+    function show() {
+        {% for device in devices %}
+            {#            $.getJSON('{% url "mb_json2_dev_detail" pk=device.pk %}', function (data) {#}
+            d3.json('{% url "json_dev_detail" pk=device.pk %}', function (data) {
+                var items = data["registers"];
+                for (var i = 0; i < items.length; i++) {
+                    var title = items[i]["title"];
+                    var cData = new Date();
+                    var lData = new Date(items[i]["last_time"]);
+                    var dDate = cData - lData;
+                    var value = 0;
+                    {#                var value = items[i]["last_value"];#}
+                    if (dDate < 300000) {
+                        value = items[i]["last_value"];
+                    } else {
+                        {#                    value = items[i]["last_value"];#}
+                    }
+                    var name = '';
+                    var units = '';
+                    if (title === 'Температура') {
+                        name = '#gauge-{{ device.pk }}-t';
+                        units = ' t, C';
+                    } else if (title === 'Давление') {
+                        name = '#gauge-{{ device.pk }}-p';
+                        units = ' P, МПа';
+                    }
+                    var chart = c3.generate({
+                        bindto: name,
+                        data: {
+                            columns: [
+
+                                [title, value]
+                            ],
+                            type: 'gauge'
+                        },
+                        gauge: {
+                            label: {
+                                format: function (value) {
+                                    return value;
+                                },
+                                {# show: false // to turn off the min/max labels.#}
+                            },
+                            min: 0, // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
+                            max: 200, // 100 is default
+                            units: units,
+                            {#  width: 39, // for adjusting arc thickness#}
+                            expand: false
+                        },
+                        color: {
+                            pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.
+                            threshold: {
+                                unit: 'value', // percentage is default
+                                {#                max: 200, // 100 is default#}
+                                values: [30, 60, 90, 100]
+                            }
+                        },
+                        size: {
+                            height: 180
+                        }
+                    });
+                }
+
+            });
+        {% endfor %}
+    }
+
+
+    $(document).ready(function () {
+        show();
+        setInterval('show()', 10000);
+    });
+</script>
+
+{#    <script>#}
+{#        var chart = c3.generate({#}
+{#            bindto: '#gauge-{{ device.pk }}-p',#}
+{#            data: {#}
+{#                columns: [#}
+{#                    ['давление', 0.87]#}
+{#                ],#}
+{#                type: 'gauge'#}
+{#            },#}
+{#            gauge: {#}
+{#                label: {#}
+{#                    format: function (value) {#}
+{#                        return value;#}
+{#                    },#}
+{#                    show: false // to turn off the min/max labels.#}
+{#                },#}
+{#                min: 0, // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change#}
+{#                max: 2, // 100 is default#}
+{#                units: ' P, МПа',#}
+{#                width: 39, // for adjusting arc thickness#}
+{#                expand: false#}
+{#            },#}
+{#            color: {#}
+{#                pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.#}
+{#                threshold: {#}
+{#//            unit: 'value', // percentage is default#}
+{#//            max: 200, // 100 is default#}
+{#                    values: [0.05, 0.1, 1, 1.5]#}
+{#                }#}
+{#            },#}
+{#            size: {#}
+{#                height: 180#}
+{#            }#}
+{#        });#}
+{#    </script>#}
+
+{##}
+{##}
+{#<script>#}
+{#    var chart = c3.generate({#}
+{#        bindto: '#gauge3',#}
+{#        data: {#}
+{#            columns: [#}
+{#                ['температура', 63.7]#}
+{#            ],#}
+{#            type: 'gauge'#}
+{#        },#}
+{#        gauge: {#}
+{#            label: {#}
+{#                format: function (value) {#}
+{#                    return value;#}
+{#                },#}
+{# show: false // to turn off the min/max labels.#}
+{#            },#}
+{#            min: 0, // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change#}
+{#            max: 200, // 100 is default#}
+{#            units: ' t, C',#}
+{#  width: 39, // for adjusting arc thickness#}
+{#            expand: false#}
+{#        },#}
+{#        color: {#}
+{#            pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.#}
+{#            threshold: {#}
+{#                unit: 'value', // percentage is default#}
+{#                max: 200, // 100 is default#}
+{#                values: [30, 60, 90, 100]#}
+{#            }#}
+{#        },#}
+{#        size: {#}
+{#            height: 180#}
+{#        }#}
+{#    });#}
+{#</script>#}
+{#<script>#}
+{#    var chart = c3.generate({#}
+{#        bindto: '#gauge4',#}
+{#        data: {#}
+{#            columns: [#}
+{#                ['давление', 0.36]#}
+{#            ],#}
+{#            type: 'gauge'#}
+{#        },#}
+{#        gauge: {#}
+{#            label: {#}
+{#                format: function (value) {#}
+{#                    return value;#}
+{#                },#}
+{# show: false // to turn off the min/max labels.#}
+{#            },#}
+{#            min: 0, // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change#}
+{#            max: 2, // 100 is default#}
+{#            units: ' P, МПа',#}
+{#  width: 39, // for adjusting arc thickness#}
+{#            expand: false#}
+{#        },#}
+{#        color: {#}
+{#            pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.#}
+{#            threshold: {#}
+{#//            unit: 'value', // percentage is default#}
+{#//            max: 200, // 100 is default#}
+{#                values: [0.05, 0.1, 1, 1.5]#}
+{#            }#}
+{#        },#}
+{#        size: {#}
+{#            height: 180#}
+{#        }#}
+{#    });#}
+{#</script>#}
+</html>

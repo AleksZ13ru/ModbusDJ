@@ -1,0 +1,210 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Пар</title>
+    <!-- Load foundation6.4.2.css -->
+    <link href="{% static 'mb_server/css/foundation.css' %}" rel="stylesheet">
+    <link href="{% static 'mb_server/css/app.css' %}" rel="stylesheet">
+
+    <!-- Load c3.css -->
+    <link href="{% static 'mb_server/css/c3.css' %}" rel="stylesheet">
+
+    {#    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>#}
+    <!-- Load d3.js and c3.js -->
+    <script src="{% static 'mb_server/js/d3.v3.js' %}" charset="utf-8"></script>
+    <script src="{% static 'mb_server/js/c3.js' %}"></script>
+</head>
+<body>
+<div class="top-bar">
+    <div class="top-bar-left">
+        <ul class="dropdown menu" data-dropdown-menu>
+            <li class="menu-text">Пар</li>
+            <li><a href='{% url 'mb_list' %}'>Все</a></li>
+            {#            {% for device in devices %}#}
+            <li><a href='{% url 'mb_detals' pk=device.pk %}'>{{ device.title }}</a></li>
+            {#            {% endfor %}#}
+        </ul>
+    </div>
+    <div class="top-bar-right">
+        <ul class="menu">
+            <li><input type="search" placeholder="Search"></li>
+            <li>
+                <button type="button" class="button">Обновить</button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="grid-container " style="margin-top: 2%">
+    <div class="grid-x grid-margin-x">
+
+        <div class="small-6 cell">
+            <div class="callout">
+                <div class="grid-x">
+                    <div class="small-12 cell text-center">
+                        <h5>{{ device.title }}</h5>
+                    </div>
+                    <div class="small-6 cell">
+                        <div id="gauge-{{ device_id }}-t"></div>
+                    </div>
+                    <div class="small-6 cell">
+                        <div id="gauge-{{ device_id }}-p"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid-x">
+        <div class="small-12 cell">
+            <div class="callout">
+                <div id="chart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="{% static 'mb_server/js/jquery.js' %}"></script>
+<script src="{% static 'mb_server/js/what-input.js' %}"></script>
+<script src="{% static 'mb_server/js/foundation.js' %}"></script>
+<script src="{% static 'mb_server/js/app.js' %}"></script>
+<script>
+    var columns = [];
+    d3.json('{% url "mb_json2_time_stamp_detail" pk=3 %}', function (data) {
+        var x1 = [];
+        columns.push(x1.concat("x1", data["x"]));
+        console.log(x1);
+    });
+
+    function show_trend() {
+        d3.json('{% url "json_val_in_dev_detail" dev_pk=device_id %}', function (data) {
+            var axes = {};
+            var names = {};
+            for (var i = 0; i < data.length; i++) {
+                var name_first = data[i]["dev_title"];
+                var name_second = data[i]["reg_title"];
+                var name_full = name_first + "." + name_second;
+                var values = data[i]["value"];
+                var data_id = "data" + data[i]["id"];
+                var column = [];
+                columns.push(column.concat(data_id, values));
+                names[data_id] = name_full;
+                switch (name_second) {
+                    case "Температура":
+                        axes[data_id] = "y";
+                        break;
+                    case "Давление":
+                        axes[data_id] = "y2";
+                        break;
+                    default:
+                        axes[data_id] = "y";
+                        break;
+                }
+            }
+
+            console.log(columns);
+            console.log(names);
+            var chart = c3.generate({
+                bindto: '#chart',
+                data: {
+                    columns: columns,
+                    x: 'x1',
+                    xFormat: '%H:%M',
+                    axes: axes,
+                    names: names
+                },
+                axis: {
+                    x: {
+                        type: 'timeseries',
+                        tick: {
+                            format: '%H:%M',
+                            count: 10
+                        }
+                    },
+                    y2: {
+                        show: true
+                    }
+                }
+            });
+        });
+    }
+    $(document).ready(function () {
+        show_trend();
+                setInterval('show_trend()', 60000);
+    });
+</script>
+<script>
+    function show() {
+        d3.json('{% url "json_dev_detail" pk=device_id %}', function (data) {
+            var items = data["registers"];
+            for (var i = 0; i < items.length; i++) {
+                var title = items[i]["title"];
+                var cData = new Date();
+                var lData = new Date(items[i]["last_time"]);
+                var dDate = cData - lData;
+                var value = 0;
+                {#                var value = items[i]["last_value"];#}
+                if (dDate < 300000) {
+                    value = items[i]["last_value"];
+                } else {
+                    {#                    value = items[i]["last_value"];#}
+                }
+                var name = '';
+                var units = '';
+                switch (title) {
+                    case "Температура":
+                        name = '#gauge-{{ device_id }}-t';
+                        units = ' t, C';
+                        break;
+                    case "Давление":
+                        name = '#gauge-{{ device_id }}-p';
+                        units = ' P, МПа';
+                        break;
+                    default:
+                        break;
+                }
+                var chart = c3.generate({
+                    bindto: name,
+                    data: {
+                        columns: [
+
+                            [title, value]
+                        ],
+                        type: 'gauge'
+                    },
+                    gauge: {
+                        label: {
+                            format: function (value) {
+                                return value;
+                            },
+                            {# show: false // to turn off the min/max labels.#}
+                        },
+                        min: 0, // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
+                        max: 200, // 100 is default
+                        units: units,
+                        {#  width: 39, // for adjusting arc thickness#}
+                        expand: false
+                    },
+                    color: {
+                        pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.
+                        threshold: {
+                            unit: 'value', // percentage is default
+                            {#                max: 200, // 100 is default#}
+                            values: [30, 60, 90, 100]
+                        }
+                    },
+                    size: {
+                        height: 180
+                    }
+                });
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        show();
+                setInterval('show()', 10000);
+    });
+</script>
+</html>
