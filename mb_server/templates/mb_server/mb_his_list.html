@@ -41,23 +41,23 @@
 
 <div class="grid-container " style="margin-top: 2%">
     <div class="grid-x grid-margin-x">
-        {% for device in devices %}
-            <div class="small-6 cell">
-                <div class="callout">
-                    <div class="grid-x">
-                        <div class="small-12 cell text-center">
-                            <h5>{{ device.title }}</h5>
-                        </div>
-                        <div class="small-6 cell">
-                            <div id="gauge-{{ device.pk }}-t"></div>
-                        </div>
-                        <div class="small-6 cell">
-                            <div id="gauge-{{ device.pk }}-p"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
+{#        {% for device in devices %}#}
+{#            <div class="small-6 cell">#}
+{#                <div class="callout">#}
+{#                    <div class="grid-x">#}
+{#                        <div class="small-12 cell text-center">#}
+{#                            <h5>{{ device.title }}</h5>#}
+{#                        </div>#}
+{#                        <div class="small-6 cell">#}
+{#                            <div id="gauge-{{ device.pk }}-t"></div>#}
+{#                        </div>#}
+{#                        <div class="small-6 cell">#}
+{#                            <div id="gauge-{{ device.pk }}-p"></div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        {% endfor %}#}
     </div>
     <div class="grid-x">
         <div class="small-12 cell">
@@ -99,10 +99,7 @@
     });
 
     function show_trend() {
-{#        if ($('#dp1').val() === new Date()){#}
-{#            console.log($('#dp1').val());#}
-{#        }#}
-        d3.json('{% url "json_val_in_dev" %}', function (data) {
+        d3.json('{% url "json_his_val_in_dev" date="171117" %}', function (data) {
             var axes = {};
             var names = {};
             for (var i = 0; i < data.length; i++) {

@@ -9,11 +9,11 @@ celery -A ModbusDJ worker -l info --concurrency=1 # terminal 1
 celery -A ModbusDJ beat -l info --scheduler django_celery_beat.schedulers.DatabaseScheduler  # terminal 2
 
 todo:
-add calendar in form:list, detail
++ add calendar in form:list, detail
 visual history data in select calendar data
 modify function show in javascript, disable use old version REST function("mb_json2_time_stamp_detail"), use new function  "json_tstamp_detail"
-clear comment string old code
-add project to github
++ clear comment string old code
++ add project to github
 
 
 todo:start in raspberry pi 3

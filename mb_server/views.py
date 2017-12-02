@@ -1,3 +1,5 @@
+import datetime
+
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse  # HttpResponse,
 from django.views.decorators.csrf import csrf_exempt
@@ -153,10 +155,10 @@ class JsonRegisterDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Register.objects.all()
     serializer_class = RegisterSerializer
 
+    # class JsonValueList(generics.ListCreateAPIView):
+    #     queryset = Value2.objects.all()
+    #     serializer_class = ValueSerializer
 
-# class JsonValueList(generics.ListCreateAPIView):
-#     queryset = Value2.objects.all()
-#     serializer_class = ValueSerializer
 
 # --------------- Val ----------------------------- #
 class JsonValueList(generics.ListCreateAPIView):
@@ -164,9 +166,16 @@ class JsonValueList(generics.ListCreateAPIView):
     serializer_class = ValueSerializer
 
     def get_queryset(self):
-        date_now = timezone.now()
-        date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        return Value2.objects.filter(date__date=date_now)
+        his_date = self.kwargs.get('date', None)
+        if his_date is None:
+            date_now = timezone.now()
+            date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            queryset = Value2.objects.filter(date__date=date_now)
+        else:
+            date_now = datetime.datetime.strptime(his_date, '%y%m%d')
+            date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            queryset = Value2.objects.filter(date__date=date_now)
+        return queryset
 
 
 class JsonValueDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -174,9 +183,16 @@ class JsonValueDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ValueSerializer
 
     def get_queryset(self):
-        date_now = timezone.now()
-        date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        return Value2.objects.filter(date__date=date_now)
+        his_date = self.kwargs.get('date', None)
+        if his_date is None:
+            date_now = timezone.now()
+            date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            queryset = Value2.objects.filter(date__date=date_now)
+        else:
+            date_now = datetime.datetime.strptime(his_date, '%y%m%d')
+            date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            queryset = Value2.objects.filter(date__date=date_now)
+        return queryset
 
 
 # --------------- Val End ------------------------- #
@@ -185,26 +201,43 @@ class JsonValueDetail(generics.RetrieveUpdateDestroyAPIView):
 class JsonValueInRegList(generics.ListCreateAPIView):
     # queryset = Value2.objects.all()
     serializer_class = ValueInRegSerializer
+
     # lookup_fields = 'register__id'
 
     def get_queryset(self):
-        date_now = timezone.now()
-        date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        return Value2.objects.filter(date__date=date_now)
+        his_date = self.kwargs.get('date', None)
+        if his_date is None:
+            date_now = timezone.now()
+            date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            queryset = Value2.objects.filter(date__date=date_now)
+        else:
+            his_date = datetime.datetime.strptime(his_date, '%y%m%d')
+            queryset = Value2.objects.filter(date__date=his_date)
+        return queryset
 
 
 class JsonValueInRegDetail(generics.ListCreateAPIView):
     # queryset = Register.objects.all()
     serializer_class = ValueInRegSerializer
+
     # lookup_fields = 'register__id'
 
     def get_queryset(self):
-        date_now = timezone.now()
-        date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        queryset = Value2.objects.filter(date__date=date_now)
+        his_date = self.kwargs.get('date', None)
         reg_id = self.kwargs.get('reg_pk', None)
-        if reg_id is not None:
-            queryset = Value2.objects.filter(date__date=date_now, register_id=reg_id)
+        if his_date is None:
+            date_now = timezone.now()
+            date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            if reg_id is None:
+                queryset = Value2.objects.filter(date__date=date_now)
+            else:
+                queryset = Value2.objects.filter(date__date=date_now, register_id=reg_id)
+        else:
+            his_date = datetime.datetime.strptime(his_date, '%y%m%d')
+            if reg_id is None:
+                queryset = Value2.objects.filter(date__date=his_date)
+            else:
+                queryset = Value2.objects.filter(date__date=his_date, register_id=reg_id)
         return queryset
 
 
@@ -216,9 +249,15 @@ class JsonValueInDevList(generics.ListCreateAPIView):
     serializer_class = ValueInDevSerializer
 
     def get_queryset(self):
-        date_now = timezone.now()
-        date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        return Value2.objects.filter(date__date=date_now)  # filter(registers__values__date__date=date_now)
+        his_date = self.kwargs.get('date', None)
+        if his_date is None:
+            date_now = timezone.now()
+            date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            queryset = Value2.objects.filter(date__date=date_now)
+        else:
+            his_date = datetime.datetime.strptime(his_date, '%y%m%d')
+            queryset = Value2.objects.filter(date__date=his_date)
+        return queryset
 
 
 class JsonValueInDevDetail(generics.ListCreateAPIView):
@@ -226,13 +265,23 @@ class JsonValueInDevDetail(generics.ListCreateAPIView):
     serializer_class = ValueInDevSerializer
 
     def get_queryset(self):
-        date_now = timezone.now()
-        date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        queryset = Value2.objects.filter(date__date=date_now)
+        his_date = self.kwargs.get('date', None)
         dev_id = self.kwargs.get('dev_pk', None)
-        if dev_id is not None:
-            queryset = Value2.objects.filter(date__date=date_now, register__device_id=dev_id)
+        if his_date is None:
+            date_now = timezone.now()
+            date_now = date_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            if dev_id is None:
+                queryset = Value2.objects.filter(date__date=date_now)
+            else:
+                queryset = Value2.objects.filter(date__date=date_now, register__device_id=dev_id)
+        else:
+            his_date = datetime.datetime.strptime(his_date, '%y%m%d')
+            if dev_id is None:
+                queryset = Value2.objects.filter(date__date=his_date)
+            else:
+                queryset = Value2.objects.filter(date__date=his_date, register__device_id=dev_id)
         return queryset
+
 # --------------- Dev End ------------------------- #
 #
 # class MbJsonListTimeStamp(generics.ListCreateAPIView):

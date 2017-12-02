@@ -27,11 +27,22 @@ urlpatterns = [
     url(r'^json/val/$', views.JsonValueList.as_view(), name='json_val'),
     url(r'^json/val/(?P<pk>[0-9]+)$', views.JsonValueDetail.as_view(), name='json_val_detail'),
 
+    url(r'^json/his/(?P<date>[0-9]+)/val/$', views.JsonValueList.as_view(), name='json_his_val'),
+    url(r'^json/his/(?P<date>[0-9]+)/val/(?P<pk>[0-9]+)$', views.JsonValueDetail.as_view(), name='json_his_val_detail'),
+
     url(r'^json/val_in_reg/$', views.JsonValueInRegList.as_view(), name='json_val_in_reg'),
     url(r'^json/val_in_reg/(?P<reg_pk>[0-9]+)$', views.JsonValueInRegDetail.as_view(), name='json_val_in_reg_detail'),
 
+    url(r'^json/his/(?P<date>[0-9]+)/val_in_reg/$', views.JsonValueInRegList.as_view(), name='json_his_val_in_reg'),
+    url(r'^json/his/(?P<date>[0-9]+)/val_in_reg/(?P<reg_pk>[0-9]+)$', views.JsonValueInRegDetail.as_view(),
+        name='json_his_val_in_reg_detail'),
+
     url(r'^json/val_in_dev/$', views.JsonValueInDevList.as_view(), name='json_val_in_dev'),
     url(r'^json/val_in_dev/(?P<dev_pk>[0-9]+)$', views.JsonValueInDevDetail.as_view(), name='json_val_in_dev_detail'),
+
+    url(r'^json/his/(?P<date>[0-9]+)/val_in_dev/$', views.JsonValueInDevList.as_view(), name='json_his_val_in_dev'),
+    url(r'^json/his/(?P<date>[0-9]+)/val_in_dev/(?P<dev_pk>[0-9]+)$', views.JsonValueInDevDetail.as_view(),
+        name='json_his_val_in_dev_detail'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
