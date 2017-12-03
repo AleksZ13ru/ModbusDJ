@@ -5,17 +5,17 @@
     <meta charset="UTF-8">
     <title>Пар</title>
     <!-- Load foundation6.4.2.css -->
-    <link href="{% static 'mb_server/css/foundation.css' %}" rel="stylesheet">
-    <link href="{% static 'mb_server/css/foundation-datepicker.css' %}" rel="stylesheet">
+    <link href="{% static 'mb_server/css/foundation.min.css' %}" rel="stylesheet">
+    <link href="{% static 'mb_server/css/foundation-datepicker.min.css' %}" rel="stylesheet">
     <link href="{% static 'mb_server/css/app.css' %}" rel="stylesheet">
 
     <!-- Load c3.css -->
-    <link href="{% static 'mb_server/css/c3.css' %}" rel="stylesheet">
+    <link href="{% static 'mb_server/css/c3.min.css' %}" rel="stylesheet">
 
     {#    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>#}
     <!-- Load d3.js and c3.js -->
-    <script src="{% static 'mb_server/js/d3.v3.js' %}" charset="utf-8"></script>
-    <script src="{% static 'mb_server/js/c3.js' %}"></script>
+    <script src="{% static 'mb_server/js/d3.v3.min.js' %}" charset="utf-8"></script>
+    <script src="{% static 'mb_server/js/c3.min.js' %}"></script>
 </head>
 <body>
 <div class="top-bar">
@@ -70,8 +70,8 @@
 </body>
 <script src="{% static 'mb_server/js/jquery.js' %}"></script>
 <script src="{% static 'mb_server/js/what-input.js' %}"></script>
-<script src="{% static 'mb_server/js/foundation.js' %}"></script>
-<script src="{% static 'mb_server/js/foundation-datepicker.js' %}"></script>
+<script src="{% static 'mb_server/js/foundation.min.js' %}"></script>
+<script src="{% static 'mb_server/js/foundation-datepicker.min.js' %}"></script>
 <script src="{% static 'mb_server/js/locales/foundation-datepicker.ru.js' %}"></script>
 <script src="{% static 'mb_server/js/app.js' %}"></script>
 <script>
@@ -86,6 +86,8 @@
             language: 'ru'
         }).on('changeDate', function (event) {
             console.log($('#dp1').val());
+
+            {#$.get('/his/010101');#}
         });
 
     });
@@ -99,9 +101,9 @@
     });
 
     function show_trend() {
-{#        if ($('#dp1').val() === new Date()){#}
-{#            console.log($('#dp1').val());#}
-{#        }#}
+        {#        if ($('#dp1').val() === new Date()){#}
+        {#            console.log($('#dp1').val());#}
+        {#        }#}
         d3.json('{% url "json_val_in_dev" %}', function (data) {
             var axes = {};
             var names = {};

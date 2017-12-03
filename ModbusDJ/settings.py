@@ -25,7 +25,7 @@ SECRET_KEY = 'uqdlp5^6z$*%nr+#id7x=_$*o_myeg$*03vs))r8ixp8zf(*fh'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0']
 
 # Celery settings
 # CELERY_ENABLE_UTC = True
@@ -113,7 +113,7 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAdminUser',
+        # 'rest_framework.permissions.IsAdminUser',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',

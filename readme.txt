@@ -19,30 +19,44 @@ modify function show in javascript, disable use old version REST function("mb_js
 todo:start in raspberry pi 3
 0.  wget https://bootstrap.pypa.io/get-pip.py
     sudo python3 get-pip.py
-    install virtualenv: pip3 install virtualenv
-1. sudo apt-get install git, python3-dev
-2.0. create virtualenv: virtualenv ModbusVEN
-2.1. git clone https://github.com/AleksZ13ru/ModbusDJ.git
-2.2. install pakets: pip install -r requirements.txt - !I am have problem to install from file, single install OK
-
-3. setting postgresql:
-3.0. install:
+    install virtualenv: sudo pip3 install virtualenv
+1. sudo apt-get install git python3-dev libpq-dev
+2. setting postgresql:
+2.0. install:
     sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
     wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -
     sudo apt-get update
     sudo apt-get install postgresql postgresql-contrib
-3.1. test run: sudo -u postgres psql
+2.1. test run: sudo -u postgres psql
 CREATE DATABASE db;
 CREATE USER postuser WITH password 'passuser';
 GRANT ALL ON DATABASE db TO postuser;
 \q
-3.2. migrate date from db
+2.2. migrate date from db
 python manage.py migrate
 old server: ./manage.py dumpdata --exclude auth.permission --exclude contenttypes > db.json
 
 new server: python manage.py loaddata db.json
+2.3 remote connect
+    sudo nano /etc/postgresql/9.6/main/postgresql.conf
+    modify string: listen_addresses='localhost' =>: listen_addresses='*'
 
-3.3 setting celery broker: rabbitmq
+    sudo nano /etc/postgresql/9.6/main/pg_hba.conf
+    host    all             all              0.0.0.0/0                       md5
+    host    all             all              ::/0                            md5
+
+    reload postgresql: /etc/init.d/postgresql restart
+
+    test work:
+    netstat -nlt  # list ip address connect enabled
+    psql -h 107.170.158.89 -U postgres  # connect, i am have problem in consol.
+
+
+3.0. create virtualenv: virtualenv ModbusVEN
+3.1. git clone https://github.com/AleksZ13ru/ModbusDJ.git
+3.2. install pakets: pip install -r requirements.txt - !I am have problem to install from file, single install OK
+
+4.0 setting celery broker: rabbitmq
 
 sudo apt-get install rabbitmq-server
 sudo rabbitmqctl add_user celeryuser celerypass
@@ -55,6 +69,7 @@ CELERY_BROKER_URL = 'amqp://celeryuser:celerypass@localhost:5672/myvhost'
 4. add start celery and django in sustemd
 5. sudo apt-get install nginx
 
+#help delete line in nano textreader = Ctrl+K
 5.1 setting nginx in file: sudo nano /etc/nginx/sites-available/default :
 	server {
     		listen 80;
@@ -138,6 +153,7 @@ WantedBy=multi-user.target
     sudo systemctl status ModbusDJ
     sudo systemctl enable ModbusDJ
     sudo systemctl -l status ModbusDJ
+    sudo systemctl daemon-reload
 
 todo: run from raspberry pi3
 ssh pi@192.168.1.241

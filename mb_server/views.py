@@ -25,6 +25,14 @@ def mb_list(request):
     return render(request, 'mb_server/mb_list.html', {'devices': devices, 'regs': regs})
 
 
+# date = 171120 - 17-year, 11-mount, 20-day
+def mb_his(request, date):
+
+    regs = Register.objects.all()
+    devices = Device.objects.all()
+    return render(request, 'mb_server/mb_his_list.html', {'devices': devices, 'regs': regs, 'date': date})
+
+
 def mb_detals(request, pk):
     # devices = get_object_or_404(Device, pk=pk)
     device = Device.objects.get(pk=pk)

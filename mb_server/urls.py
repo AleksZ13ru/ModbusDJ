@@ -4,6 +4,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     url(r'^$', views.mb_list, name='mb_list'),
+    url(r'^his/(?P<date>[0-9]+)$', views.mb_his, name='mb_his'),
     url(r'^(?P<pk>[0-9]+)$', views.mb_detals, name='mb_detals'),
     # url(r'^all/$', views.mb_all, name='mb_all'),
     # url(r'^json/$', views.mb_json, name='mb_json'),
